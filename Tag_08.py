@@ -1,7 +1,7 @@
 from time import perf_counter as pfc
 import re
 import itertools
-import numpy as np
+import collections
 
 
 def load(file):
@@ -15,18 +15,13 @@ def solve(p):
     if zeile[:2] == 're':
       rect(a, b)
     else:
-      rotate_row(a,b) if zeile[7] == 'r' else rotate_col(a,b)
+      grid[a].rotate(b) if zeile[7] == 'r' else rotate_col(a,b)
   return sum(sum(z) for z in grid)
 
 
-def rotate_row(row, n):
-  r = grid[row]
-  grid[row] = r[-n:]+r[:width-n]
-
-
 def rotate_col(col, n):
-  c = [grid[y][col] for y in range(6)]
-  c = c[-n:]+c[:height-n]
+  c = collections.deque([grid[y][col] for y in range(6)])
+  c.rotate(n)
   for y, value in enumerate(c):
     grid[y][col] = value
 
@@ -38,7 +33,7 @@ def rect(a, b):
 
 puzzle = load('Tag_08.txt')
 width, height = 50,6
-grid = [[0]*width for _ in range(height)]
+grid = [collections.deque([0]*width) for _ in range(height)]
 
 start = pfc()
 print(solve(puzzle), pfc() - start)
