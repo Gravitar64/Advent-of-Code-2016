@@ -4,25 +4,21 @@ import re
 
 def load(file):
   with open(file) as f:
-    return [x.strip() for x in f]
+    return [re.split(r'\[([^\]]+)\]', line.strip()) for line in f]
 
 
-def is_abba(e):
-  return re.search(r'(.)(?!\1)(.)\2\1', e) != None
+def abba(x, part2=False):
+  pattern = r'(?=((.)(?!\2).\2))' if part2 else r'(.)(?!\1)(.)\2\1'
+  return re.search(pattern, x) != None
 
-
-def has_tls(e):
-  for md in re.finditer(r'\[.*?\]', e):
-    if is_abba(md.group(0)):
-      return False
-  return is_abba(e)
-
-
-def solve(p):
-  return sum(map(has_tls, p))
-
-
-puzzle = load('Tag_07.txt')
 
 start = pfc()
-print(solve(puzzle), pfc() - start)
+puzzle = load('Tag_07.txt')
+parts = [(' '.join(p[::2]), ' '.join(p[1::2])) for p in puzzle]
+
+
+print('Part 1:', sum(abba(sn) and not (abba(hn)) for sn, hn in parts))
+print('Part 2:', sum(any(a == c and a != b and b+a+b in hn
+                         for a, b, c in zip(sn, sn[1:], sn[2:]))
+                         for sn, hn in parts))
+print(pfc() - start)
