@@ -20,25 +20,27 @@ def solve(p):
   heapq.heappush(queue, (0, p))
   results = {p: 0}
   while queue:
-    priority, (elevator, floors) = heapq.heappop(queue)
-    if elevator == 3 and all(not x for x in floors[:-1]): 
-      return results[(elevator, floors)]
-    next_elevators = [dir + elevator for dir in [-1,1] if -1 < dir+elevator < 4]
-    moves = list(combinations(floors[elevator], 2)) + list(combinations(floors[elevator], 1))
+    prio, (elev1, floors) = heapq.heappop(queue)
+    if elev1 == 3 and all(not x for x in floors[:-1]): return results[(elev1, floors)]
+    
+    next_elevators = [dir + elev1 for dir in [-1,1] if -1 < dir+elev1 < 4]
+    moves = list(combinations(floors[elev1], 2)) + list(combinations(floors[elev1], 1))
+    
     for move in moves:
-      for next_elevator in next_elevators:
-        new_floors = list(floors)
-        new_floors[elevator] = tuple(x for x in new_floors[elevator] if x not in move)
-        new_floors[next_elevator] = tuple(new_floors[next_elevator] + move)
-        if not check(new_floors[elevator]) or not check(new_floors[next_elevator]): continue
-        next_p = sort_floors((next_elevator, tuple(new_floors)))
-        steps = results[((elevator, floors))] + 1
+      for elev2 in next_elevators:
+        new = list(floors)
+        new[elev1] = tuple(x for x in new[elev1] if x not in move)
+        new[elev2] = tuple(new[elev2] + move)
+        if not check(new[elev1]) or not check(new[elev2]): continue
+        
+        next_p = sort_floors((elev2, tuple(new)))
+        steps = results[((elev1, floors))] + 1
+        
         if next_p not in results or steps < results[next_p]:
           results[next_p] = steps
-          priority = steps  - len(new_floors[3])*10
-          heapq.heappush(queue, (priority, next_p))
+          prio = steps  - len(new[3])*10
+          heapq.heappush(queue, (prio, next_p))
           
-
 
 start = pfc()
 po, th, pr, ru, co, el, di = 1, 2, 3, 4, 5, 6, 7
